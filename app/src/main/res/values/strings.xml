@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Kurtis Gallery</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="share_all_images_of_this_series">SHARE ALL IMAGES OF THIS SERIES</string>
+    <string name="download_all_images_of_this_series">DOWNLOAD ALL IMAGES OF THIS SERIES</string>
+    <string name="description">Description</string>
+    <string name="fragment_1_title">FragmentNewArrival</string>
+    <string name="fragment_2_title">AKPremiumOneFragment</string>
+    <string name="fragment_3_title">AKPPremiumTwoFragment</string>
+    <string name="fragment_4_title">AKVSeriesOneFragment</string>
+</resources>

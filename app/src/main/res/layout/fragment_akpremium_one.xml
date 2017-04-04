@@ -1,0 +1,97 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    tools:context="developers.findingcodes.kurtisgallery.FragmentNewArrival">
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <TextView android:layout_height="40dp"
+            android:layout_width="match_parent"
+            android:text="@string/description"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/back"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="@color/desc"
+            android:textStyle="normal"
+            android:gravity="center_vertical"
+            />
+
+        <LinearLayout
+
+            android:layout_height="45dp"
+            android:layout_width="match_parent"
+            android:paddingLeft="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:orientation="horizontal"
+            android:background="@drawable/back">
+
+            <TextView android:layout_height="40dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:textColor="@color/desc"
+                android:textStyle="bold"
+                android:text="@string/download_all_images_of_this_series"
+                android:gravity="center_vertical"
+
+                />
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/download"
+                android:layout_margin="6dp"
+                android:id="@+id/downloadall"
+                />
+
+
+        </LinearLayout>
+        <LinearLayout
+
+            android:layout_height="45dp"
+            android:layout_width="match_parent"
+            android:paddingLeft="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+
+
+            android:orientation="horizontal"
+            android:background="@drawable/back">
+
+            <TextView android:layout_height="40dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:textColor="@color/desc"
+                android:textStyle="bold"
+                android:text="@string/share_all_images_of_this_series"
+                android:gravity="center_vertical"
+
+                />
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:src="@drawable/whatsapp"
+                android:layout_margin="6dp"
+                android:id="@+id/whatsappsharebtn"
+                />
+
+
+        </LinearLayout>
+
+
+
+
+        <include layout="@layout/content_main" />
+
+</LinearLayout>
+
+
+</FrameLayout>
