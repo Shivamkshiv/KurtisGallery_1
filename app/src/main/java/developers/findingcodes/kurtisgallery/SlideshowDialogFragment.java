@@ -11,15 +11,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,9 +47,12 @@ public class SlideshowDialogFragment extends DialogFragment {
     private MyViewPagerAdapter myViewPagerAdapter;
     private TextView lblCount, lblTitle, lblDate;
     private int selectedPosition = 0;
-    private TextView textView;
-    private TextView whatsappShare;
+    private ProgressBar progressBar;
     private ImageView imageView;
+    private TextView downloadImage;
+    private  TextView shareImage;
+
+    private Toolbar toolbar;
 
     static SlideshowDialogFragment newInstance() {
         SlideshowDialogFragment f = new SlideshowDialogFragment();
@@ -63,26 +69,37 @@ public class SlideshowDialogFragment extends DialogFragment {
 
         View v = inflater.inflate(R.layout.fragment_image_slider, container, false);
 
-        textView =(TextView) v.findViewById(R.id.downloadone);
-        whatsappShare=(TextView) v.findViewById(R.id.sharewhatsapp);
+        toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+
+        progressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+
+        downloadImage = (TextView) v.findViewById(R.id.downloadone);
+
+        shareImage = (TextView) v.findViewById(R.id.sharewhatsapp);
 
 
 
 
-        // set the listener for Navigation
-        Toolbar actionBar = (Toolbar) v.findViewById(R.id.fake_action_bar);
-        if (actionBar!=null) {
-            final SlideshowDialogFragment window = this;
-            actionBar.setTitle("knfkdnf");
-            actionBar.setNavigationOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    window.dismiss();
-                }
-            });
-        }
+
+
+
+//
+//        // set the listener for Navigation
+//        Toolbar actionBar = (Toolbar) v.findViewById(R.id.fake_action_bar);
+//        if (actionBar!=null) {
+//            final SlideshowDialogFragment window = this;
+//            actionBar.setTitle("knfkdnf");
+//            actionBar.setNavigationOnClickListener(new View.OnClickListener() {
+//                public void onClick(View v) {
+//                    window.dismiss();
+//                }
+//            });
+//        }
+
+
         viewPager = (ViewPager) v.findViewById(R.id.viewpager);
         lblCount = (TextView) v.findViewById(R.id.lbl_count);
-       // lblTitle = (TextView) v.findViewById(R.id.title);
+        // lblTitle = (TextView) v.findViewById(R.id.title);
         //lblDate = (TextView) v.findViewById(R.id.date);
 
         images = (ArrayList<Image>) getArguments().getSerializable("images");
@@ -128,9 +145,9 @@ public class SlideshowDialogFragment extends DialogFragment {
         lblCount.setText((position + 1) + " of " + images.size());
 
         Image image = images.get(position);
-       // lblTitle.setText(image.getLarge());
+        // lblTitle.setText(image.getLarge());
         final String imgsrc =image.getLarge();
-        textView.setOnClickListener(new View.OnClickListener() {
+        downloadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 downloadImage(imgsrc);
@@ -145,7 +162,7 @@ public class SlideshowDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       //setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        //setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         setStyle(DialogFragment.STYLE_NO_FRAME, android.R.style.Theme_Holo_Light_DarkActionBar);
 
     }
@@ -166,6 +183,8 @@ public class SlideshowDialogFragment extends DialogFragment {
 
             imageView = (ImageView) view.findViewById(R.id.image_preview);
 
+
+
             Image image = images.get(position);
 
             Glide.with(getActivity()).load(image.getLarge())
@@ -173,12 +192,16 @@ public class SlideshowDialogFragment extends DialogFragment {
                     .crossFade()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(imageView);
-            whatsappShare.setOnClickListener(new View.OnClickListener() {
+
+            progressBar.setVisibility(View.INVISIBLE);
+
+
+            shareImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     //shareImage();
-                   // ImageView iv = (ImageView) view.findViewById(viewPager.getCurrentItem());
+                    // ImageView iv = (ImageView) view.findViewById(viewPager.getCurrentItem());
 
                     Log.e(TAG, "IMAGEs " +imageView);
                     //Uri bmpUri = getLocalBitmapUri(imageView);
@@ -311,12 +334,12 @@ public class SlideshowDialogFragment extends DialogFragment {
 
 
 
-   }
+    }
 
     public Uri getLocalBitmapUri(ImageView imageView) {
         // Extract Bitmap from ImageView drawable
 
-    Log.v(TAG,"IMAGEJI "+imageView);
+        Log.v(TAG,"IMAGEJI "+imageView);
         //iv.setDrawingCacheEnabled(true);
         Drawable drawable = imageView.getDrawable();
         Bitmap bmp = null;

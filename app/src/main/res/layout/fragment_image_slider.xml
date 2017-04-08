@@ -46,8 +46,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/imgview"
-               android:id="@+id/downloadone"
-
+                android:id="@+id/downloadone"
                 android:text="DOWNLOAD"
                 android:textStyle="bold"
                 android:gravity="center"
@@ -69,6 +68,20 @@
 
 
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="16dp"
+        android:indeterminate="true"
+        android:visibility="visible" />
+
+
+
 
 
 </RelativeLayout>

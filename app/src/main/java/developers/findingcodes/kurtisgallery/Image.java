@@ -13,10 +13,15 @@ public class Image implements Serializable{
 
 
 
-
     public Image(String small) {
         this.small = small;
     }
+
+    public Image(String small, String large) {
+        this.small = small;
+        this.large = large;
+    }
+
 
 
     public String getName() {

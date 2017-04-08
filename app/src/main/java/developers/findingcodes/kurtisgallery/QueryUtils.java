@@ -21,6 +21,7 @@ import java.util.List;
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
  */
+
 public final class QueryUtils {
 
 
@@ -28,10 +29,10 @@ public final class QueryUtils {
 
     private static ArrayList<Image> images;
 
-    private QueryUtils() {
+    protected QueryUtils() {
     }
 
-    private static URL createUrl(String stringUrl) {
+    private URL createUrl(String stringUrl) {
         URL url = null;
         try {
             url = new URL(stringUrl);
@@ -41,7 +42,7 @@ public final class QueryUtils {
         return url;
     }
 
-    private static String makeHttpRequest(URL url) throws IOException {
+    private  String makeHttpRequest(URL url) throws IOException {
         String jsonResponse = "";
 
         // If the URL is null, then return early.
@@ -53,8 +54,6 @@ public final class QueryUtils {
         InputStream inputStream = null;
         try {
             urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setReadTimeout(100000 /* milliseconds */);
-            urlConnection.setConnectTimeout(150000 /* milliseconds */);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 
@@ -82,7 +81,7 @@ public final class QueryUtils {
         return jsonResponse;
     }
 
-    private static String readFromStream(InputStream inputStream) throws IOException {
+    private  String readFromStream(InputStream inputStream) throws IOException {
         StringBuilder output = new StringBuilder();
         if (inputStream != null) {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
@@ -96,59 +95,7 @@ public final class QueryUtils {
         return output.toString();
     }
 
-
-
-
-
-
-
-    private static List<Image> extractFeatureFromJson(String imageJSON) {
-        // If the JSON string is empty or null, then return early.
-        if (TextUtils.isEmpty(imageJSON)) {
-            return null;
-        }
-
-        // Create an empty ArrayList that we can start adding earthquakes to
-        images = new ArrayList<>();
-
-        // Try to parse the JSON response string. If there's a problem with the way the JSON
-        // is formatted, a JSONException exception object will be thrown.
-        // Catch the exception so the app doesn't crash, and print the error message to the logs.
-        try {
-
-           JSONArray jsonArray = new JSONArray(imageJSON);
-
-            // For each earthquake in the earthquakeArray, create an {@link Earthquake} object
-            for (int i = 0; i < jsonArray.length(); i++) {
-
-                // Get a single earthquake at position i within the list of earthquakes
-                JSONObject currentImage = jsonArray.getJSONObject(i);
-
-                //Extract the image for the value thumb_img_dest
-                String small = currentImage.getString("thumb_img_dest");
-
-                Image image = new Image(small);
-
-                // Add the new {@link Earthquake} to the list of earthquakes.
-                images.add(image);
-            }
-
-        } catch (JSONException e) {
-            // If an error is thrown when executing any of the above statements in the "try" block,
-            // catch the exception here, so the app doesn't crash. Print a log message
-            // with the message from the exception.
-            Log.e("QueryUtils", "Problem parsing the earthquake JSON results", e);
-        }
-
-        // Return the list of earthquakes
-        return images;
-    }
-
-    public static List<Image> getImageArrayList(){
-        return images;
-    }
-
-    public static List<Image> fetchImageData(String requestUrl) {
+    public  List<Image> fetchImageData(String requestUrl) {
 
 
 
@@ -174,6 +121,69 @@ public final class QueryUtils {
 
         // Return the list of {@link Earthquake}s
         return extractFeatureFromJson(jsonResponse);
+    }
+
+
+
+
+
+
+
+   public  List<Image> extractFeatureFromJson(String imageJSON) {
+        // If the JSON string is empty or null, then return early.
+        if (TextUtils.isEmpty(imageJSON)) {
+            return null;
+        }
+
+        // Create an empty ArrayList that we can start adding earthquakes to
+        images = new ArrayList<>();
+
+        // Try to parse the JSON response string. If there's a problem with the way the JSON
+        // is formatted, a JSONException exception object will be thrown.
+        // Catch the exception so the app doesn't crash, and print the error message to the logs.
+        try {
+
+           JSONArray jsonArray = new JSONArray(imageJSON);
+
+            // For each earthquake in the earthquakeArray, create an {@link Earthquake} object
+            for (int i = 0; i < jsonArray.length(); i++) {
+
+                // Get a single earthquake at position i within the list of earthquakes
+                JSONObject currentImage = jsonArray.getJSONObject(i);
+
+                //Extract the image for the value thumb_img_dest
+                String small = currentImage.getString("thumb_img_dest");
+
+                //Extract the image for the value original_img_dest
+                String large = currentImage.getString("original_img_dest");
+
+
+                Image image = new Image(small,large);
+
+                // Add the new {@link Earthquake} to the list of earthquakes.
+                images.add(image);
+            }
+
+        } catch (JSONException e) {
+            // If an error is thrown when executing any of the above statements in the "try" block,
+            // catch the exception here, so the app doesn't crash. Print a log message
+            // with the message from the exception.
+            Log.e("QueryUtils", "Problem parsing the earthquake JSON results", e);
+        }
+
+        // Return the list of earthquakes
+        return images;
+    }
+
+
+
+
+
+    public  List<Image> getImageArrayList(){
+
+        //return the list of images
+        return images;
+
     }
 
 }

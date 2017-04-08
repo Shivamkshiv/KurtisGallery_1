@@ -23,6 +23,8 @@
             android:gravity="center_vertical"
             />
 
+
+
         <LinearLayout
 
             android:layout_height="45dp"
@@ -87,9 +89,8 @@
         </LinearLayout>
 
 
-
-
         <include layout="@layout/content_main" />
+
 
 </LinearLayout>
 

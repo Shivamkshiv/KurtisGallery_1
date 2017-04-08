@@ -1,32 +1,51 @@
 package developers.findingcodes.kurtisgallery;
 
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +54,14 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
 
     private String TAG = MainActivity.class.getSimpleName();
     private static final String IMAGE_URL = "https://developers.kurtisgallery.in/example_api/kurtisone/id/7";
-    private ArrayList<Image> images  = (ArrayList<Image>) QueryUtils.getImageArrayList();
+    private ArrayList<Image> lists;
     private GalleryAdapter mAdapter;
-    private GridView gridView;
+    private RecyclerView recyclerView;
     ImageView downloadimg;
     ImageView whatsappShare;
-    private static final int EARTHQUAKE_LOADER_ID = 1;
+    private ProgressBar mProgressBar;
+    private static final int IMAGE_LOADER_ID = 1;
+
 
 
 
@@ -68,20 +89,21 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         whatsappShare= (ImageView) rootView.findViewById(R.id.whatsappsharebtn);
 
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.progressBar1);
+
 
         //setSupportActionBar(toolbar);
 
-        gridView = (GridView) rootView.findViewById(R.id.grid_View);
+        //setSupportActionBar(toolbar);
+
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
 
 
-        images = new ArrayList<>();
-        mAdapter = new GalleryAdapter(getActivity(), images);
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        recyclerView.addOnItemTouchListener(new GalleryAdapter.RecyclerTouchListener(getActivity(), recyclerView, new GalleryAdapter.ClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+            public void onClick(View view, int position) {
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("images", images);
+                bundle.putSerializable("images", lists);
                 bundle.putInt("position", position);
 
                 FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
@@ -89,7 +111,13 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
                 newFragment.setArguments(bundle);
                 newFragment.show(ft, "slideshow");
             }
-        });
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
+
 
         downloadimg = (ImageView) rootView.findViewById(R.id.downloadall);
 
@@ -97,13 +125,18 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
             @Override
             public void onClick(View view) {
                 String[] urls = new String[50];
-                for (int i = 0; i < images.size(); i++) {
-                    urls[i] = images.get(i).getLarge();
 
-                }
+                    for (int i = 0; i < lists.size(); i++) {
+                        urls[i] = lists.get(i).getSmall();
+
+                    }
+
+
                 DownloadImages downloadImages= new DownloadImages();
                 downloadImages.downloadImage(getActivity(),urls);
 
+
+                Toast.makeText(getActivity(),"Images Saved successfully",Toast.LENGTH_LONG).show();
 
 
             }
@@ -115,6 +148,17 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
 
             }
         });
+
+
+
+
+        return rootView;
+
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         // Get a reference to the ConnectivityManager to check state of network connectivity
         ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -130,20 +174,9 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
             // Initialize the loader. Pass in the int ID constant defined above and pass in null for
             // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
             // because this activity implements the LoaderCallbacks interface).
-            loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
-
-        } else {
-
-
-          //
-
+            loaderManager.initLoader(IMAGE_LOADER_ID, null, this);
 
         }
-
-
-
-        return rootView;
-
     }
 
     private void ShareImages(){
@@ -158,12 +191,11 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
 
 
 
-        for(int i=0;i<images.size();i++){
+        for(int i=0;i<lists.size();i++){
 
+            String img_url = lists.get(i).getLarge();
 
-            String img_url = images.get(i).getSmall();
-
-                    Picasso.with(getContext()).load(img_url).into(new Target() {
+            Picasso.with(getContext()).load(img_url).into(new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
 
@@ -193,6 +225,36 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
 
     }
 
+
+
+
+
+
+//    public static Bitmap getBitmapFromURL(String url) {
+//        try {
+//            URL ur = new URL(url);
+//            HttpURLConnection connection = (HttpURLConnection) ur.openConnection();
+//            connection.setDoInput(true);
+//            connection.connect();
+//            InputStream input = connection.getInputStream();
+//            Bitmap bitmapFrmUrl = BitmapFactory.decodeStream(input);
+//            return bitmapFrmUrl;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+//
+//    private  class MyTask extends AsyncTask<String,Void,Bitmap>{
+//
+//
+//        @Override
+//        protected Bitmap doInBackground(String... strings) {
+//            return null;
+//        }
+//    }
+
+
     public Uri getImageUri(Context inContext, Bitmap inImage) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
@@ -208,49 +270,53 @@ public class AKPremiumOneFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public void onLoadFinished(Loader<List<Image>> loader, List<Image> images) {
-//        // Hide loading indicator because the data has been loaded
-//        View loadingIndicator = findViewById(R.id.loading_indicator);
-//        loadingIndicator.setVisibility(View.GONE);
 
 
 
-        // Clear the adapter of previous earthquake data
-        mAdapter.clear();
+        lists = new ArrayList<>();
 
-        // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
-        // data set. This will trigger the ListView to update.
-        if (images != null && !images.isEmpty()) {
-            mAdapter.addAll(images);
+        try{
+
+
+            for(int i=0;i<images.size();i++){
+
+                String small = images.get(i).getSmall();
+                String large = images.get(i).getLarge();
+
+                Image image = new Image(small,large);
+
+                lists.add(image);
+
+            }
+
+        }catch (NullPointerException e){
+            Log.e(TAG,"ASDFG",e);
         }
+
+
+
+        mProgressBar.setVisibility(View.INVISIBLE);
+
+
+        mAdapter = new GalleryAdapter(getActivity(), lists);
+
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 2);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(mAdapter);
+
+
     }
 
     @Override
     public void onLoaderReset(Loader<List<Image>> loader) {
         // Loader reset, so we can clear out our existing data.
-        mAdapter.clear();
+
+
+        recyclerView.setAdapter(null);
+
+
     }
-
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home:
-                new SlideshowDialogFragment().show(getFragmentManager(), "confirmation_dialog");
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-
-
 
 
 

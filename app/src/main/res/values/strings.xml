@@ -11,4 +11,6 @@
     <string name="fragment_2_title">AKPremiumOneFragment</string>
     <string name="fragment_3_title">AKPPremiumTwoFragment</string>
     <string name="fragment_4_title">AKVSeriesOneFragment</string>
+    <string name="share">SHARE</string>
+    <string name="download">DOWNLOAD</string>
 </resources>
